@@ -13,8 +13,8 @@ export function inicializarDatos() {
     const usuariosIniciales = [
       {
         identificacion: '1001',
-        nombre: 'Admin Principal Acme',
-        email: 'admin@acmeschool.com',
+        nombre: 'chucho',
+        email: 'chucho@gmail.com',
         telefono: '3001234567',
         cargo: 'Administrativo',
         password: '123'
