@@ -6,22 +6,39 @@
 
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: #f1f5f9;
-  color: #1e293b;
+  background-color: #f7f2e4;
+  color: #2B1408;
   line-height: 1.5;
   min-height: 100vh;
 }
 
 :root {
-  /* Paleta de colores oficial de Quasar */
-  --q-primary: #1976D2;
-  --q-primary-dark: #1565C0;
-  --q-secondary: #26A69A;
-  --q-accent: #9C27B0;
-  --q-dark: #1D1D1D;
-  --q-positive: #21BA45;
-  --q-negative: #C10015;
-  --q-warning: #F2C037;
+  --wood-deep: #3E2210;
+  --wood-base: #2B1408;
+  --wood-warm: #5C371E;
+  --gold: #C59B27;
+  --brass: #B38628;
+  --gold-bright: #D4AF37;
+  --parchment: #FDFBF2;
+  --parchment-light: #FFFDF6;
+  --parchment-alt: #F7F2E4;
+  --forest: #1E4620;
+  --forest-deep: #153417;
+  --oxford: #1B325F;
+  --oxford-deep: #112140;
+  --burgundy: #631622;
+  --burgundy-deep: #4A0E17;
+  --amber: #8C5A1B;
+  --amber-light: #A06A21;
+
+  --q-primary: var(--burgundy);
+  --q-primary-dark: var(--burgundy-deep);
+  --q-secondary: var(--oxford);
+  --q-accent: var(--gold);
+  --q-dark: var(--wood-base);
+  --q-positive: var(--forest);
+  --q-negative: var(--burgundy);
+  --q-warning: var(--gold-bright);
 
   /* Sombras Material Design (q-card) */
   --q-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
