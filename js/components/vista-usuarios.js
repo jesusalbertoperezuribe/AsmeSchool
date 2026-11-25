@@ -16,117 +16,136 @@ class VistaUsuarios extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
+      *, *::before, *::after {
+  box-sizing: border-box;
+}
+
+#form-usuario {
+  width: 100%;
+  max-width: 310px;
+  margin: 0 auto;
+}
         :host {
           display: block;
-          max-width: 1200px;
-          margin: 2rem auto;
-          padding: 0 1.5rem;
-          animation: aparecer 0.3s ease;
+          animation: aparecer 0.25s ease;
         }
 
         @keyframes aparecer {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
-          color: #1e293b;
+          color: var(--q-dark, #1D1D1D);
+          font-weight: 500;
+          font-size: 1.6rem;
+          text-align: center;
           margin-bottom: 1.5rem;
         }
 
-        /* Estructura de 2 columnas igual a tu segundo boceto */
         .contenedor-dos-columnas {
           display: grid;
-          grid-template-columns: 1fr 2fr;
-          gap: 2rem;
+          grid-template-columns: 360px 1fr;
+          gap: 24px;
           align-items: start;
         }
 
-        /* En celulares se pone una caja debajo de la otra */
-        @media (max-width: 850px) {
+        @media (max-width: 880px) {
           .contenedor-dos-columnas {
             grid-template-columns: 1fr;
           }
         }
 
-        .tarjeta {
+        .q-card {
           background-color: #ffffff;
-          padding: 1.5rem;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          box-shadow: var(--q-shadow-2);
+          overflow: hidden;
         }
 
-        .tarjeta h3 {
-          margin-top: 0;
-          color: #0284c7;
-          border-bottom: 1px solid #e2e8f0;
-          padding-bottom: 0.75rem;
+        .q-card-header {
+          padding: 14px 20px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+          font-size: 1.05rem;
+          font-weight: 500;
+          color: var(--q-primary, #1976D2);
+        }
+
+        .q-card-body {
+          padding: 20px;
         }
 
         .campo {
-          margin-bottom: 1rem;
+          margin-bottom: 14px;
         }
 
         label {
           display: block;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #334155;
-          margin-bottom: 0.3rem;
+          font-size: 0.8rem;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.7);
+          margin-bottom: 4px;
         }
 
         input, select {
           width: 100%;
-          padding: 0.6rem;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          font-size: 0.95rem;
-          box-sizing: border-box;
+          font-family: inherit;
+          padding: 10px 12px;
+          border: 1px solid rgba(0, 0, 0, 0.24);
+          border-radius: 4px;
+          font-size: 0.92rem;
+          background-color: #ffffff;
         }
 
         input:focus, select:focus {
           outline: none;
-          border-color: #0284c7;
+          border-color: var(--q-primary, #1976D2);
+          box-shadow: inset 0 0 0 1px var(--q-primary, #1976D2);
         }
 
         input:disabled {
-          background-color: #f1f5f9;
+          background-color: #f5f5f5;
+          color: rgba(0, 0, 0, 0.5);
           cursor: not-allowed;
         }
 
         .botones-form {
           display: flex;
-          gap: 0.5rem;
-          margin-top: 1.2rem;
+          gap: 8px;
+          margin-top: 18px;
         }
 
-        button {
-          padding: 0.65rem 1rem;
+        .q-btn {
+          font-family: inherit;
+          text-transform: uppercase;
+          font-weight: 500;
+          letter-spacing: 0.04em;
+          padding: 10px 16px;
           border: none;
-          border-radius: 6px;
-          font-weight: 600;
+          border-radius: 4px;
           cursor: pointer;
+          font-size: 0.85rem;
+          box-shadow: var(--q-shadow-1);
           transition: opacity 0.2s;
         }
 
-        button:hover {
+        .q-btn:hover {
           opacity: 0.9;
         }
 
         .btn-guardar {
-          background-color: #0284c7;
-          color: white;
+          background-color: var(--q-primary, #1976D2);
+          color: #ffffff;
           flex: 1;
         }
 
         .btn-cancelar {
-          background-color: #64748b;
-          color: white;
+          background-color: #9e9e9e;
+          color: #ffffff;
           display: none;
         }
 
-        /* Estilos de la tabla */
+        /* Tabla estilo q-table */
         .tabla-responsive {
           overflow-x: auto;
         }
@@ -134,100 +153,106 @@ class VistaUsuarios extends HTMLElement {
         table {
           width: 100%;
           border-collapse: collapse;
-          font-size: 0.9rem;
+          font-size: 0.88rem;
         }
 
         th, td {
-          padding: 0.75rem;
+          padding: 12px 16px;
           text-align: left;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.12);
         }
 
         th {
-          background-color: #f8fafc;
-          color: #475569;
-          font-weight: 700;
+          font-weight: 500;
+          font-size: 0.8rem;
+          color: rgba(0, 0, 0, 0.54);
         }
 
-        .badge {
-          padding: 0.25rem 0.6rem;
-          border-radius: 999px;
+        tbody tr:hover {
+          background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .q-badge {
+          display: inline-block;
+          padding: 3px 8px;
+          border-radius: 4px;
           font-size: 0.75rem;
-          font-weight: 600;
-          background-color: #e0f2fe;
-          color: #0369a1;
+          font-weight: 500;
+          background-color: var(--q-secondary, #26A69A);
+          color: #ffffff;
         }
 
         .acciones {
           display: flex;
-          gap: 0.4rem;
+          gap: 6px;
+        }
+
+        .btn-mini {
+          padding: 5px 10px;
+          font-size: 0.75rem;
         }
 
         .btn-editar {
-          background-color: #f59e0b;
-          color: white;
-          padding: 0.4rem 0.7rem;
-          font-size: 0.8rem;
+          background-color: var(--q-warning, #F2C037);
+          color: #1d1d1d;
         }
 
         .btn-eliminar {
-          background-color: #ef4444;
-          color: white;
-          padding: 0.4rem 0.7rem;
-          font-size: 0.8rem;
+          background-color: var(--q-negative, #C10015);
+          color: #ffffff;
         }
       </style>
 
       <h2>Gestión de Usuarios</h2>
 
       <div class="contenedor-dos-columnas">
-        <!-- CAJA IZQUIERDA: FORMULARIO -->
-        <div class="tarjeta">
-          <h3 id="titulo-form">Registrar Usuario</h3>
-          <form id="form-usuario">
-            <div class="campo">
-              <label for="identificacion">Número de identificación</label>
-              <input type="text" id="identificacion" required>
-            </div>
+        <div class="q-card">
+          <div class="q-card-header" id="titulo-form">Registrar Usuario</div>
+          <div class="q-card-body">
+            <form id="form-usuario">
+              <div class="campo">
+                <label for="identificacion">Número de identificación</label>
+                <input type="text" id="identificacion" required>
+              </div>
 
-            <div class="campo">
-              <label for="nombre">Nombre completo</label>
-              <input type="text" id="nombre" required>
-            </div>
+              <div class="campo">
+                <label for="nombre">Nombre completo</label>
+                <input type="text" id="nombre" required>
+              </div>
 
-            <div class="campo">
-              <label for="email">Correo electrónico</label>
-              <input type="email" id="email" required>
-            </div>
+              <div class="campo">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" required>
+              </div>
 
-            <div class="campo">
-              <label for="telefono">Teléfono</label>
-              <input type="tel" id="telefono" required>
-            </div>
+              <div class="campo">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" required>
+              </div>
 
-            <div class="campo">
-              <label for="cargo">Cargo</label>
-              <select id="cargo" required>
-                <option value="Docente">Docente</option>
-                <option value="Administrativo">Administrativo</option>
-              </select>
-            </div>
+              <div class="campo">
+                <label for="cargo">Cargo</label>
+                <select id="cargo" required>
+                  <option value="Docente">Docente</option>
+                  <option value="Administrativo">Administrativo</option>
+                </select>
+              </div>
 
-            <div class="campo">
-              <label for="password">Contraseña</label>
-              <input type="password" id="password" required>
-            </div>
+              <div class="campo">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required>
+              </div>
 
-            <div class="botones-form">
-              <button type="submit" class="btn-guardar" id="btn-submit">Guardar Usuario</button>
-              <button type="button" class="btn-cancelar" id="btn-cancelar">Cancelar</button>
-            </div>
-          </form>
+              <div class="botones-form">
+                <button type="submit" class="q-btn btn-guardar" id="btn-submit">Guardar</button>
+                <button type="button" class="q-btn btn-cancelar" id="btn-cancelar">Cancelar</button>
+              </div>
+            </form>
+          </div>
         </div>
 
-        <!-- CAJA DERECHA: TABLA DE USUARIOS -->
-        <div class="tarjeta">
-          <h3>Usuarios Registrados</h3>
+        <div class="q-card">
+          <div class="q-card-header">Usuarios Registrados</div>
           <div class="tabla-responsive">
             <table>
               <thead>
@@ -240,17 +265,17 @@ class VistaUsuarios extends HTMLElement {
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody id="tabla-cuerpo">
+              <tbody>
                 ${usuarios.map(u => `
                   <tr>
                     <td>${u.identificacion}</td>
                     <td>${u.nombre}</td>
                     <td>${u.email}</td>
                     <td>${u.telefono}</td>
-                    <td><span class="badge">${u.cargo}</span></td>
+                    <td><span class="q-badge">${u.cargo}</span></td>
                     <td class="acciones">
-                      <button class="btn-editar" data-id="${u.identificacion}">Editar</button>
-                      <button class="btn-eliminar" data-id="${u.identificacion}">Eliminar</button>
+                      <button class="q-btn btn-mini btn-editar" data-id="${u.identificacion}">Editar</button>
+                      <button class="q-btn btn-mini btn-eliminar" data-id="${u.identificacion}">Eliminar</button>
                     </td>
                   </tr>
                 `).join('')}
@@ -271,7 +296,6 @@ class VistaUsuarios extends HTMLElement {
     const btnSubmit = this.shadowRoot.getElementById('btn-submit');
     const btnCancelar = this.shadowRoot.getElementById('btn-cancelar');
 
-    // 1. Guardar o actualizar usuario
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -286,32 +310,28 @@ class VistaUsuarios extends HTMLElement {
 
       guardarUsuario(usuario);
       this.modoEdicion = false;
-      this.render(); // Volvemos a dibujar para ver la tabla actualizada
+      this.render();
     });
 
-    // 2. Cancelar edición
     btnCancelar.addEventListener('click', () => {
       this.modoEdicion = false;
       this.render();
     });
 
-    // 3. Botones de Editar en la tabla
     this.shadowRoot.querySelectorAll('.btn-editar').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
         const usuario = obtenerUsuarios().find(u => u.identificacion === id);
         if (!usuario) return;
 
-        // Llenamos el formulario con los datos del usuario elegido
         inputId.value = usuario.identificacion;
-        inputId.disabled = true; // Bloqueamos el ID para que no lo cambien al editar
+        inputId.disabled = true;
         this.shadowRoot.getElementById('nombre').value = usuario.nombre;
         this.shadowRoot.getElementById('email').value = usuario.email;
         this.shadowRoot.getElementById('telefono').value = usuario.telefono;
         this.shadowRoot.getElementById('cargo').value = usuario.cargo;
         this.shadowRoot.getElementById('password').value = usuario.password;
 
-        // Cambiamos textos de botones
         tituloForm.textContent = 'Actualizar Usuario';
         btnSubmit.textContent = 'Actualizar';
         btnCancelar.style.display = 'inline-block';
@@ -319,7 +339,6 @@ class VistaUsuarios extends HTMLElement {
       });
     });
 
-    // 4. Botones de Eliminar en la tabla
     this.shadowRoot.querySelectorAll('.btn-eliminar').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;

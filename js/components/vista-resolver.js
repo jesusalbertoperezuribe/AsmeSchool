@@ -11,19 +11,16 @@ class VistaResolver extends HTMLElement {
   }
 
   connectedCallback() {
-    // Si alguien intenta entrar sin haber elegido examen, lo devolvemos a la cartelera
     if (!this.datosInicio || !this.datosInicio.examen) {
       this.irACartelera();
       return;
     }
 
-    // Convertimos los minutos del examen a segundos para el reloj
     this.segundosRestantes = this.datosInicio.examen.tiempo * 60;
     this.render();
     this.iniciarReloj();
   }
 
-  // Si el usuario cierra o cambia de pantalla antes de terminar, apagamos el reloj
   disconnectedCallback() {
     if (this.intervalo) {
       clearInterval(this.intervalo);
@@ -38,7 +35,6 @@ class VistaResolver extends HTMLElement {
     }));
   }
 
-  // Formatea los segundos a estilo reloj digital (Ej: 04:59)
   formatearTiempo(totalSegundos) {
     const minutos = Math.floor(totalSegundos / 60);
     const segundos = totalSegundos % 60;
@@ -54,13 +50,11 @@ class VistaResolver extends HTMLElement {
       if (visorReloj) {
         visorReloj.textContent = this.formatearTiempo(Math.max(0, this.segundosRestantes));
 
-        // Si queda menos de 1 minuto, ponemos el reloj en rojo para avisar
         if (this.segundosRestantes <= 60) {
           visorReloj.classList.add('urgente');
         }
       }
 
-      // Cuando el reloj llega a 0, el examen se entrega automáticamente
       if (this.segundosRestantes <= 0) {
         clearInterval(this.intervalo);
         this.finalizarExamen(true);
@@ -80,7 +74,6 @@ class VistaResolver extends HTMLElement {
     const totalPreguntas = examen.preguntas.length;
     let aciertos = 0;
 
-    // Revisamos pregunta por pregunta qué marcó el estudiante
     examen.preguntas.forEach((pregunta, indexPregunta) => {
       const seleccionada = this.shadowRoot.querySelector(`input[name="pregunta-${indexPregunta}"]:checked`);
       if (seleccionada) {
@@ -91,13 +84,11 @@ class VistaResolver extends HTMLElement {
       }
     });
 
-    // Calculamos el porcentaje obtenido y verificamos si aprobó
     const porcentajeObtenido = totalPreguntas > 0
       ? Math.round((aciertos / totalPreguntas) * 100)
       : 0;
     const aprobado = porcentajeObtenido >= examen.porcentajeAprobacion;
 
-    // Guardamos el resultado asociado al estudiante en localStorage
     guardarResultado({
       codigoExamen: examen.codigo,
       tituloExamen: examen.titulo,
@@ -110,7 +101,6 @@ class VistaResolver extends HTMLElement {
       fecha: new Date().toLocaleString()
     });
 
-    // Mostramos la pantalla final con la nota
     this.mostrarResultado({
       aciertos,
       totalPreguntas,
@@ -126,23 +116,30 @@ class VistaResolver extends HTMLElement {
     const { estudiante, examen } = this.datosInicio;
 
     contenedor.innerHTML = `
-      <div class="tarjeta-resultado">
-        ${datos.porTiempoAgotado ? '<p class="aviso-tiempo">⏰ ¡Se acabó el tiempo! El examen se envió automáticamente.</p>' : ''}
-        
-        <div class="icono-estado">${datos.aprobado ? '🎉' : '📚'}</div>
-        <h2>${datos.aprobado ? '¡Felicitaciones, Aprobaste!' : 'Examen No Aprobado'}</h2>
-        <p class="estudiante-resumen">
-          <strong>${estudiante.nombre}</strong> (ID: ${estudiante.identificacion})<br>
-          Examen: ${examen.titulo}
-        </p>
-
-        <div class="puntaje-caja ${datos.aprobado ? 'aprobado' : 'reprobado'}">
-          <span class="porcentaje-grande">${datos.porcentajeObtenido}%</span>
-          <span>Respondiste correctamente <strong>${datos.aciertos}</strong> de <strong>${datos.totalPreguntas}</strong> preguntas</span>
-          <small>Porcentaje mínimo requerido: ${datos.porcentajeRequerido}%</small>
+      <div class="q-card tarjeta-resultado">
+        <div class="banner-estado ${datos.aprobado ? 'aprobado' : 'reprobado'}">
+          <h2>${datos.aprobado ? '¡Examen Aprobado!' : 'Examen No Aprobado'}</h2>
         </div>
 
-        <button id="btn-volver" class="btn-volver">Volver a Exámenes Disponibles</button>
+        <div class="resultado-body">
+          ${datos.porTiempoAgotado ? '<p class="aviso-tiempo">⏰ Tiempo agotado. El examen se envió automáticamente.</p>' : ''}
+          
+          <p class="estudiante-resumen">
+            <strong>${estudiante.nombre}</strong> (ID: ${estudiante.identificacion})<br>
+            ${examen.titulo}
+          </p>
+
+          <div class="porcentaje-grande ${datos.aprobado ? 'texto-aprobado' : 'texto-reprobado'}">
+            ${datos.porcentajeObtenido}%
+          </div>
+          
+          <p class="detalle-aciertos">
+            Acertaste <strong>${datos.aciertos}</strong> de <strong>${datos.totalPreguntas}</strong> preguntas<br>
+            <small>Mínimo requerido: ${datos.porcentajeRequerido}%</small>
+          </p>
+
+          <button id="btn-volver" class="q-btn btn-volver">Volver a Exámenes</button>
+        </div>
       </div>
     `;
 
@@ -158,226 +155,225 @@ class VistaResolver extends HTMLElement {
       <style>
         :host {
           display: block;
-          max-width: 900px;
-          margin: 2rem auto;
-          padding: 0 1.5rem;
-          animation: aparecer 0.3s ease;
+          max-width: 780px;
+          margin: 0 auto;
+          animation: aparecer 0.25s ease;
         }
 
         @keyframes aparecer {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Encabezado fijo con datos del examen y el reloj */
-        .encabezado-examen {
+        .q-card {
           background-color: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-left: 6px solid #0284c7;
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin-bottom: 1.5rem;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+          border-radius: 4px;
+          box-shadow: var(--q-shadow-2);
+          margin-bottom: 16px;
+          overflow: hidden;
+        }
+
+        .encabezado-examen {
+          border-left: 5px solid var(--q-primary, #1976D2);
+          padding: 16px 20px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
-          gap: 1rem;
+          gap: 12px;
           position: sticky;
-          top: 70px;
+          top: 72px;
           z-index: 50;
         }
 
         .info-examen h2 {
-          margin: 0 0 0.4rem 0;
-          color: #1e293b;
-          font-size: 1.4rem;
+          margin: 0 0 6px 0;
+          color: var(--q-dark, #1D1D1D);
+          font-size: 1.3rem;
+          font-weight: 500;
         }
 
         .meta-datos {
           display: flex;
-          gap: 1rem;
+          gap: 14px;
           flex-wrap: wrap;
-          font-size: 0.9rem;
-          color: #475569;
+          font-size: 0.85rem;
+          color: rgba(0, 0, 0, 0.65);
         }
 
         .caja-reloj {
-          background-color: #f1f5f9;
-          padding: 0.75rem 1.2rem;
-          border-radius: 10px;
+          background-color: #f5f5f5;
+          border: 1px solid rgba(0, 0, 0, 0.12);
+          padding: 8px 16px;
+          border-radius: 4px;
           text-align: center;
-          min-width: 120px;
+          min-width: 115px;
         }
 
         .caja-reloj span {
           display: block;
-          font-size: 0.75rem;
-          color: #64748b;
-          font-weight: 600;
+          font-size: 0.7rem;
+          color: rgba(0, 0, 0, 0.54);
+          font-weight: 500;
           text-transform: uppercase;
         }
 
         #reloj {
-          font-size: 1.6rem;
-          font-weight: 800;
-          color: #0284c7;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--q-primary, #1976D2);
           font-variant-numeric: tabular-nums;
         }
 
         #reloj.urgente {
-          color: #dc2626;
+          color: var(--q-negative, #C10015);
           animation: parpadeo 1s infinite;
         }
 
         @keyframes parpadeo {
-          50% { opacity: 0.5; }
+          50% { opacity: 0.4; }
         }
 
-        /* Tarjetas de cada pregunta */
         .tarjeta-pregunta {
-          background-color: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 1.5rem;
-          margin-bottom: 1.2rem;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+          padding: 20px;
         }
 
         .titulo-pregunta {
-          font-size: 1.05rem;
-          font-weight: 700;
-          color: #1e293b;
-          margin: 0 0 1rem 0;
+          font-size: 1rem;
+          font-weight: 500;
+          color: var(--q-dark, #1D1D1D);
+          margin: 0 0 14px 0;
         }
 
+        /* Estilo q-item seleccionable */
         .opcion-label {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.75rem 1rem;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
-          margin-bottom: 0.6rem;
+          gap: 12px;
+          padding: 11px 14px;
+          border: 1px solid rgba(0, 0, 0, 0.14);
+          border-radius: 4px;
+          margin-bottom: 8px;
           cursor: pointer;
-          transition: all 0.15s ease;
-          color: #334155;
+          transition: background-color 0.15s ease, border-color 0.15s ease;
+          color: rgba(0, 0, 0, 0.85);
+          font-size: 0.95rem;
         }
 
         .opcion-label:hover {
-          background-color: #f0f9ff;
-          border-color: #0284c7;
+          background-color: rgba(25, 118, 210, 0.06);
+          border-color: var(--q-primary, #1976D2);
         }
 
         input[type="radio"] {
           width: 18px;
           height: 18px;
-          accent-color: #0284c7;
+          accent-color: var(--q-primary, #1976D2);
           cursor: pointer;
+        }
+
+        .q-btn {
+          font-family: inherit;
+          text-transform: uppercase;
+          font-weight: 500;
+          letter-spacing: 0.04em;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          box-shadow: var(--q-shadow-2);
+          transition: opacity 0.2s;
+        }
+
+        .q-btn:hover {
+          opacity: 0.92;
         }
 
         .btn-terminar {
           width: 100%;
-          padding: 1rem;
-          background-color: #16a34a;
+          padding: 14px;
+          background-color: var(--q-positive, #21BA45);
           color: #ffffff;
-          border: none;
-          border-radius: 10px;
-          font-size: 1.1rem;
-          font-weight: 700;
-          cursor: pointer;
-          margin-top: 1rem;
-          transition: background-color 0.2s;
+          font-size: 0.95rem;
+          margin-top: 8px;
         }
 
-        .btn-terminar:hover {
-          background-color: #15803d;
-        }
-
-        /* Estilos de la vista de resultado final */
+        /* Tarjeta final centrada */
         .tarjeta-resultado {
-          background-color: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          padding: 2.5rem 2rem;
-          text-align: center;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-          max-width: 550px;
+          max-width: 480px;
           margin: 2rem auto;
+          text-align: center;
+        }
+
+        .banner-estado {
+          padding: 20px;
+          color: #ffffff;
+        }
+
+        .banner-estado h2 {
+          margin: 0;
+          font-weight: 500;
+          font-size: 1.4rem;
+        }
+
+        .banner-estado.aprobado {
+          background-color: var(--q-positive, #21BA45);
+        }
+
+        .banner-estado.reprobado {
+          background-color: var(--q-negative, #C10015);
+        }
+
+        .resultado-body {
+          padding: 24px;
         }
 
         .aviso-tiempo {
-          background-color: #fef3c7;
-          color: #92400e;
-          padding: 0.6rem;
-          border-radius: 8px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          margin-bottom: 1rem;
-        }
-
-        .icono-estado {
-          font-size: 3.5rem;
-          margin-bottom: 0.5rem;
+          background-color: var(--q-warning, #F2C037);
+          color: #1d1d1d;
+          padding: 8px 12px;
+          border-radius: 4px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          margin-bottom: 16px;
         }
 
         .estudiante-resumen {
-          color: #64748b;
+          color: rgba(0, 0, 0, 0.65);
+          margin: 0 0 16px 0;
           line-height: 1.5;
-          margin-bottom: 1.5rem;
-        }
-
-        .puntaje-caja {
-          padding: 1.5rem;
-          border-radius: 12px;
-          margin-bottom: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.4rem;
-        }
-
-        .puntaje-caja.aprobado {
-          background-color: #dcfce7;
-          color: #166534;
-          border: 1px solid #86efac;
-        }
-
-        .puntaje-caja.reprobado {
-          background-color: #fee2e2;
-          color: #991b1b;
-          border: 1px solid #fca5a5;
         }
 
         .porcentaje-grande {
-          font-size: 3rem;
-          font-weight: 800;
+          font-size: 3.2rem;
+          font-weight: 700;
+          line-height: 1.1;
+          margin-bottom: 8px;
+        }
+
+        .texto-aprobado { color: var(--q-positive, #21BA45); }
+        .texto-reprobado { color: var(--q-negative, #C10015); }
+
+        .detalle-aciertos {
+          color: rgba(0, 0, 0, 0.75);
+          margin-bottom: 24px;
         }
 
         .btn-volver {
-          padding: 0.85rem 1.5rem;
-          background-color: #0284c7;
+          padding: 11px 24px;
+          background-color: var(--q-primary, #1976D2);
           color: #ffffff;
-          border: none;
-          border-radius: 8px;
-          font-size: 1rem;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        .btn-volver:hover {
-          background-color: #0369a1;
+          font-size: 0.88rem;
         }
       </style>
 
       <div id="contenedor-principal">
-        <!-- ENCABEZADO DEL EXAMEN -->
-        <div class="encabezado-examen">
+        <div class="q-card encabezado-examen">
           <div class="info-examen">
             <h2>${examen.titulo}</h2>
             <div class="meta-datos">
-              <span>👤 Estudiante: <strong>${estudiante.nombre}</strong></span>
-              <span>📝 Total preguntas: <strong>${examen.preguntas.length}</strong></span>
-              <span>🎯 Para aprobar: <strong>${examen.porcentajeAprobacion}%</strong></span>
+              <span>Estudiante: <strong>${estudiante.nombre}</strong></span>
+              <span>Preguntas: <strong>${examen.preguntas.length}</strong></span>
+              <span>Mínimo: <strong>${examen.porcentajeAprobacion}%</strong></span>
             </div>
           </div>
 
@@ -387,10 +383,9 @@ class VistaResolver extends HTMLElement {
           </div>
         </div>
 
-        <!-- LISTA DE PREGUNTAS ENUMERADAS -->
         <form id="form-respuestas">
           ${examen.preguntas.map((pregunta, idxPregunta) => `
-            <div class="tarjeta-pregunta">
+            <div class="q-card tarjeta-pregunta">
               <p class="titulo-pregunta">${idxPregunta + 1}. ${pregunta.texto}</p>
               
               ${pregunta.respuestas.map((resp, idxResp) => `
@@ -402,7 +397,7 @@ class VistaResolver extends HTMLElement {
             </div>
           `).join('')}
 
-          <button type="submit" class="btn-terminar">Terminar Examen</button>
+          <button type="submit" class="q-btn btn-terminar">Terminar Examen</button>
         </form>
       </div>
     `;

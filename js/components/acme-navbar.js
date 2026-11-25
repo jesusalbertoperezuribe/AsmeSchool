@@ -3,17 +3,14 @@ import { obtenerSesionActual, cerrarSesion } from '../storage.js';
 class AcmeNavbar extends HTMLElement {
   constructor() {
     super();
-    // Creamos el Shadow DOM para que los estilos de esta barra no se mezclen con el resto
     this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
     this.render();
-    // Cada vez que main.js cambie de pantalla, volvemos a dibujar la barra
     document.addEventListener('cambio-ruta', () => this.render());
   }
 
-  // Función auxiliar para pedirle a main.js que cambie de pantalla
   irA(ruta) {
     this.dispatchEvent(new CustomEvent('navegar', {
       detail: { ruta },
@@ -29,29 +26,31 @@ class AcmeNavbar extends HTMLElement {
       <style>
         :host {
           display: block;
-          background-color: #1e293b;
+          background-color: var(--q-primary, #1976D2);
           color: #ffffff;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          box-shadow: var(--q-shadow-2, 0 2px 4px rgba(0,0,0,0.2));
           position: sticky;
           top: 0;
           z-index: 100;
         }
 
         nav {
-          max-width: 1200px;
+          max-width: 1140px;
           margin: 0 auto;
-          padding: 0.9rem 1.5rem;
+          padding: 0.75rem 1rem;
+          min-height: 64px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           flex-wrap: wrap;
-          gap: 1rem;
+          gap: 0.75rem;
         }
 
         .marca {
-          font-size: 1.3rem;
-          font-weight: bold;
-          color: #38bdf8;
+          font-size: 1.25rem;
+          font-weight: 500;
+          letter-spacing: 0.0125em;
+          color: #ffffff;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -61,49 +60,56 @@ class AcmeNavbar extends HTMLElement {
         .menu {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.5rem;
           flex-wrap: wrap;
         }
 
         .usuario-info {
-          font-size: 0.9rem;
-          color: #cbd5e1;
-          margin-right: 0.5rem;
+          font-size: 0.85rem;
+          background: rgba(255, 255, 255, 0.15);
+          padding: 4px 10px;
+          border-radius: 4px;
+          margin-right: 0.4rem;
         }
 
+        /* Estilo q-btn de Quasar */
         button {
-          background-color: transparent;
-          color: #f8fafc;
-          border: 1px solid #475569;
+          font-family: inherit;
+          text-transform: uppercase;
+          font-weight: 500;
+          font-size: 0.82rem;
+          letter-spacing: 0.04em;
           padding: 0.5rem 1rem;
-          border-radius: 6px;
+          border-radius: 4px;
+          border: none;
           cursor: pointer;
-          font-size: 0.9rem;
-          transition: all 0.2s ease;
+          background-color: transparent;
+          color: #ffffff;
+          transition: background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         button:hover {
-          background-color: #334155;
-          border-color: #38bdf8;
+          background-color: rgba(255, 255, 255, 0.15);
         }
 
-        .btn-primario {
-          background-color: #0284c7;
-          border-color: #0284c7;
-          font-weight: 600;
+        .btn-blanco {
+          background-color: #ffffff;
+          color: var(--q-primary, #1976D2);
+          box-shadow: var(--q-shadow-1);
         }
 
-        .btn-primario:hover {
-          background-color: #0369a1;
+        .btn-blanco:hover {
+          background-color: #f0f7ff;
         }
 
         .btn-salir {
-          background-color: #dc2626;
-          border-color: #dc2626;
+          background-color: var(--q-negative, #C10015);
+          color: #ffffff;
+          box-shadow: var(--q-shadow-1);
         }
 
         .btn-salir:hover {
-          background-color: #b91c1c;
+          background-color: #a30012;
         }
       </style>
 
@@ -112,22 +118,19 @@ class AcmeNavbar extends HTMLElement {
 
         <div class="menu">
           ${sesion ? `
-            <!-- BOTONES CUANDO EL DOCENTE / ADMINISTRATIVO INICIÓ SESIÓN -->
-            <span class="usuario-info">Hola, ${sesion.nombre} (${sesion.cargo})</span>
-            <button id="btn-usuarios">Gestión de Usuarios</button>
-            <button id="btn-examenes">Gestión de Exámenes</button>
-            <button id="btn-cartelera">Vista Estudiantes</button>
-            <button id="btn-salir" class="btn-salir">Cerrar Sesión</button>
+            <span class="usuario-info">${sesion.nombre} · ${sesion.cargo}</span>
+            <button id="btn-usuarios">Usuarios</button>
+            <button id="btn-examenes">Exámenes</button>
+            <button id="btn-cartelera">Cartelera</button>
+            <button id="btn-salir" class="btn-salir">Salir</button>
           ` : `
-            <!-- BOTONES CUANDO ES UN VISITANTE / ESTUDIANTE SIN SESIÓN -->
             <button id="btn-cartelera">Exámenes Disponibles</button>
-            <button id="btn-login" class="btn-primario">Acceso Docentes</button>
+            <button id="btn-login" class="btn-blanco">Acceso Docentes</button>
           `}
         </div>
       </nav>
     `;
 
-    // Conectamos los clics de los botones que estén visibles en este momento
     this.shadowRoot.getElementById('btn-inicio').addEventListener('click', () => this.irA('cartelera'));
     this.shadowRoot.getElementById('btn-cartelera').addEventListener('click', () => this.irA('cartelera'));
 
@@ -144,5 +147,4 @@ class AcmeNavbar extends HTMLElement {
   }
 }
 
-// Registramos la etiqueta personalizada <acme-navbar> en el navegador
 customElements.define('acme-navbar', AcmeNavbar);

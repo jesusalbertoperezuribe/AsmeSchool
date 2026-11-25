@@ -16,132 +16,154 @@ class VistaCartelera extends HTMLElement {
 
     this.shadowRoot.innerHTML = `
       <style>
+      *, *::before, *::after {
+  box-sizing: border-box;
+}
+
+#form-estudiante {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
         :host {
           display: block;
-          max-width: 1200px;
-          margin: 2rem auto;
-          padding: 0 1.5rem;
-          animation: aparecer 0.3s ease;
+          animation: aparecer 0.25s ease;
         }
 
         @keyframes aparecer {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
         .encabezado {
           text-align: center;
-          margin-bottom: 2.5rem;
+          margin-bottom: 2rem;
         }
 
         .encabezado h2 {
-          color: #1e293b;
-          font-size: 1.8rem;
-          margin: 0 0 0.5rem 0;
+          color: var(--q-dark, #1D1D1D);
+          font-size: 1.75rem;
+          font-weight: 500;
+          margin-bottom: 0.35rem;
         }
 
         .encabezado p {
-          color: #64748b;
-          margin: 0;
+          color: rgba(0, 0, 0, 0.6);
+          font-size: 0.95rem;
         }
 
-        /* Cuadrícula adaptable para las tarjetas de exámenes */
-        .grid-examenes {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 1.5rem;
+        /* Flexbox centrado: si hay 1 solo examen queda en el centro exacto */
+        .contenedor-tarjetas {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 24px;
         }
 
-        .tarjeta-examen {
+        /* Tarjeta estilo q-card */
+        .q-card {
           background-color: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 1.5rem;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+          border-radius: 4px;
+          box-shadow: var(--q-shadow-2);
+          width: 100%;
+          max-width: 340px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+          overflow: hidden;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .tarjeta-examen:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        .q-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
         }
 
-        .codigo-badge {
+        .q-card-section {
+          padding: 16px;
+        }
+
+        .q-badge {
           display: inline-block;
-          background-color: #e0f2fe;
-          color: #0369a1;
+          background-color: var(--q-secondary, #26A69A);
+          color: #ffffff;
           font-size: 0.75rem;
-          font-weight: 700;
-          padding: 0.25rem 0.6rem;
-          border-radius: 6px;
-          margin-bottom: 0.75rem;
-          align-self: flex-start;
+          font-weight: 500;
+          padding: 3px 8px;
+          border-radius: 4px;
+          margin-bottom: 10px;
         }
 
-        .tarjeta-examen h3 {
-          margin: 0 0 0.5rem 0;
-          color: #1e293b;
-          font-size: 1.25rem;
+        .q-card h3 {
+          font-size: 1.2rem;
+          font-weight: 500;
+          color: var(--q-dark, #1D1D1D);
+          margin: 0 0 8px 0;
         }
 
         .descripcion {
-          color: #64748b;
+          color: rgba(0, 0, 0, 0.65);
           font-size: 0.9rem;
-          margin: 0 0 1.2rem 0;
-          line-height: 1.4;
+          line-height: 1.45;
+          margin: 0;
+        }
+
+        .q-separator {
+          border: none;
+          border-top: 1px solid rgba(0, 0, 0, 0.12);
+          margin: 0;
         }
 
         .detalles {
-          background-color: #f8fafc;
-          border-radius: 8px;
-          padding: 0.8rem;
-          margin-bottom: 1.2rem;
           display: flex;
           justify-content: space-between;
+          padding: 12px 16px;
+          background-color: #fafafa;
           font-size: 0.85rem;
-          color: #334155;
+          color: rgba(0, 0, 0, 0.75);
         }
 
-        .detalles span strong {
-          color: #0284c7;
+        .detalles strong {
+          color: var(--q-primary, #1976D2);
         }
 
-        button {
+        .q-card-actions {
+          padding: 12px 16px 16px 16px;
+        }
+
+        .q-btn {
           width: 100%;
-          padding: 0.75rem;
+          font-family: inherit;
+          text-transform: uppercase;
+          font-weight: 500;
+          font-size: 0.875rem;
+          letter-spacing: 0.04em;
+          padding: 10px 16px;
           border: none;
-          border-radius: 8px;
-          font-size: 0.95rem;
-          font-weight: 600;
+          border-radius: 4px;
           cursor: pointer;
-          transition: background-color 0.2s;
+          box-shadow: var(--q-shadow-1);
+          transition: background-color 0.2s ease;
         }
 
-        .btn-elegir {
-          background-color: #0284c7;
+        .btn-primary {
+          background-color: var(--q-primary, #1976D2);
           color: #ffffff;
         }
 
-        .btn-elegir:hover {
-          background-color: #0369a1;
+        .btn-primary:hover {
+          background-color: var(--q-primary-dark, #1565C0);
         }
 
-        /* Modal emergente para pedir datos del estudiante */
+        /* Modal estilo q-dialog */
         .fondo-modal {
           position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(15, 23, 42, 0.6);
+          inset: 0;
+          background-color: rgba(0, 0, 0, 0.5);
           display: none;
           justify-content: center;
           align-items: center;
-          padding: 1rem;
-          box-sizing: border-box;
+          padding: 16px;
           z-index: 200;
         }
 
@@ -153,80 +175,104 @@ class VistaCartelera extends HTMLElement {
         .caja-modal {
           background-color: #ffffff;
           width: 100%;
-          max-width: 420px;
-          padding: 2rem;
-          border-radius: 12px;
-          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+          max-width: 400px;
+          border-radius: 4px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+          overflow: hidden;
         }
 
-        .caja-modal h3 {
-          margin: 0 0 0.4rem 0;
-          color: #1e293b;
+        .modal-header {
+          background-color: var(--q-primary, #1976D2);
+          color: #ffffff;
+          padding: 16px 20px;
         }
 
-        .caja-modal p {
-          margin: 0 0 1.2rem 0;
-          color: #64748b;
+        .modal-header h3 {
+          margin: 0;
+          font-size: 1.15rem;
+          font-weight: 500;
+        }
+
+        .modal-body {
+          padding: 20px;
+        }
+
+        .modal-body p {
+          margin: 0 0 16px 0;
+          color: rgba(0, 0, 0, 0.65);
           font-size: 0.9rem;
         }
 
         .campo {
-          margin-bottom: 1rem;
+          margin-bottom: 14px;
         }
 
         label {
           display: block;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #334155;
-          margin-bottom: 0.3rem;
+          font-size: 0.8rem;
+          font-weight: 500;
+          color: rgba(0, 0, 0, 0.7);
+          margin-bottom: 4px;
         }
 
+        /* Input estilo Quasar Outlined */
         input {
           width: 100%;
-          padding: 0.7rem;
-          border: 1px solid #cbd5e1;
-          border-radius: 8px;
+          font-family: inherit;
+          padding: 10px 12px;
+          border: 1px solid rgba(0, 0, 0, 0.24);
+          border-radius: 4px;
           font-size: 0.95rem;
-          box-sizing: border-box;
+          transition: border-color 0.2s;
+        }
+
+        input:hover {
+          border-color: #000000;
         }
 
         input:focus {
           outline: none;
-          border-color: #0284c7;
+          border-color: var(--q-primary, #1976D2);
+          box-shadow: inset 0 0 0 1px var(--q-primary, #1976D2);
         }
 
         .botones-modal {
           display: flex;
-          gap: 0.75rem;
-          margin-top: 1.5rem;
+          justify-content: flex-end;
+          gap: 8px;
+          margin-top: 20px;
         }
 
-        .btn-comenzar {
-          background-color: #16a34a;
-          color: white;
+        .btn-flat {
+          width: auto;
+          background-color: transparent;
+          color: rgba(0, 0, 0, 0.7);
+          box-shadow: none;
         }
 
-        .btn-comenzar:hover {
-          background-color: #15803d;
+        .btn-flat:hover {
+          background-color: rgba(0, 0, 0, 0.06);
         }
 
-        .btn-cerrar {
-          background-color: #e2e8f0;
-          color: #334155;
+        .btn-positive {
+          width: auto;
+          background-color: var(--q-positive, #21BA45);
+          color: #ffffff;
         }
 
-        .btn-cerrar:hover {
-          background-color: #cbd5e1;
+        .btn-positive:hover {
+          background-color: #1ca33c;
         }
 
         .vacio {
+          max-width: 480px;
+          margin: 0 auto;
           text-align: center;
-          padding: 3rem;
+          padding: 32px;
           background: #ffffff;
-          border-radius: 12px;
-          color: #64748b;
-          border: 1px dashed #cbd5e1;
+          border-radius: 4px;
+          box-shadow: var(--q-shadow-1);
+          color: rgba(0, 0, 0, 0.6);
         }
       </style>
 
@@ -237,53 +283,60 @@ class VistaCartelera extends HTMLElement {
 
       ${examenes.length === 0 ? `
         <div class="vacio">
-          <h3>No hay exámenes disponibles en este momento</h3>
+          <h3>No hay exámenes disponibles</h3>
           <p>Pide a un docente que registre un examen desde el panel privado.</p>
         </div>
       ` : `
-        <div class="grid-examenes">
+        <div class="contenedor-tarjetas">
           ${examenes.map(ex => `
-            <div class="tarjeta-examen">
-              <div>
-                <span class="codigo-badge">${ex.codigo}</span>
+            <div class="q-card">
+              <div class="q-card-section">
+                <span class="q-badge">${ex.codigo}</span>
                 <h3>${ex.titulo}</h3>
                 <p class="descripcion">${ex.descripcion}</p>
               </div>
 
               <div>
+                <hr class="q-separator">
                 <div class="detalles">
-                  <span>⏱️ Tiempo: <strong>${ex.tiempo} min</strong></span>
-                  <span>🎯 Aprobación: <strong>${ex.porcentajeAprobacion}%</strong></span>
+                  <span>Tiempo: <strong>${ex.tiempo} min</strong></span>
+                  <span>Aprobación: <strong>${ex.porcentajeAprobacion}%</strong></span>
                 </div>
-                <button class="btn-elegir" data-codigo="${ex.codigo}">Presentar Examen</button>
+                <hr class="q-separator">
+                <div class="q-card-actions">
+                  <button class="q-btn btn-primary btn-elegir" data-codigo="${ex.codigo}">Presentar Examen</button>
+                </div>
               </div>
             </div>
           `).join('')}
         </div>
       `}
 
-      <!-- MODAL DE REGISTRO RÁPIDO DEL ESTUDIANTE -->
       <div class="fondo-modal" id="modal-registro">
         <div class="caja-modal">
-          <h3 id="modal-titulo-examen">Datos del Estudiante</h3>
-          <p>Ingresa tus datos para asociar tu calificación al examen.</p>
+          <div class="modal-header">
+            <h3 id="modal-titulo-examen">Datos del Estudiante</h3>
+          </div>
+          <div class="modal-body">
+            <p>Ingresa tus datos para asociar tu calificación al examen.</p>
 
-          <form id="form-estudiante">
-            <div class="campo">
-              <label for="est-id">Número de identificación</label>
-              <input type="text" id="est-id" placeholder="Ej: 1098765432" required>
-            </div>
+            <form id="form-estudiante">
+              <div class="campo">
+                <label for="est-id">Número de identificación</label>
+                <input type="text" id="est-id" placeholder="Ej: 1098765432" required>
+              </div>
 
-            <div class="campo">
-              <label for="est-nombre">Nombre completo</label>
-              <input type="text" id="est-nombre" placeholder="Ej: María Fernanda Gómez" required>
-            </div>
+              <div class="campo">
+                <label for="est-nombre">Nombre completo</label>
+                <input type="text" id="est-nombre" placeholder="Ej: María Fernanda Gómez" required>
+              </div>
 
-            <div class="botones-modal">
-              <button type="button" class="btn-cerrar" id="btn-cancelar-modal">Cancelar</button>
-              <button type="submit" class="btn-comenzar">Comenzar Examen</button>
-            </div>
-          </form>
+              <div class="botones-modal">
+                <button type="button" class="q-btn btn-flat" id="btn-cancelar-modal">Cancelar</button>
+                <button type="submit" class="q-btn btn-positive">Comenzar</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     `;
@@ -296,7 +349,6 @@ class VistaCartelera extends HTMLElement {
     const tituloModal = this.shadowRoot.getElementById('modal-titulo-examen');
     const form = this.shadowRoot.getElementById('form-estudiante');
 
-    // 1. Al hacer clic en "Presentar Examen", abrimos el cuadro de registro rápido
     this.shadowRoot.querySelectorAll('.btn-elegir').forEach(btn => {
       btn.addEventListener('click', () => {
         const codigo = btn.dataset.codigo;
@@ -308,13 +360,11 @@ class VistaCartelera extends HTMLElement {
       });
     });
 
-    // 2. Cerrar el cuadro si el estudiante cancela
     this.shadowRoot.getElementById('btn-cancelar-modal').addEventListener('click', () => {
       modal.classList.remove('activo');
       this.examenSeleccionado = null;
     });
 
-    // 3. Enviar datos del estudiante y saltar a la hoja del examen
     form.addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -323,7 +373,6 @@ class VistaCartelera extends HTMLElement {
 
       if (!this.examenSeleccionado) return;
 
-      // Le enviamos a main.js el examen elegido y los datos del estudiante
       this.dispatchEvent(new CustomEvent('navegar', {
         detail: {
           ruta: 'resolver',
