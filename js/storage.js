@@ -23,15 +23,16 @@ export function inicializarDatos() {
     localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(usuariosIniciales));
   }
 
-  // Si no hay exámenes guardados, creamos uno de prueba con 2 preguntas
-  if (!localStorage.getItem(CLAVE_EXAMENES)) {
-    const examenesIniciales = [
+  // Catálogo oficial de base. Se conserva la información creada por docentes
+  // y se agregan los exámenes base que falten en instalaciones existentes.
+  const examenesIniciales = [
       {
         codigo: 'JS-101',
         titulo: 'Fundamentos de JavaScript',
         tiempo: 5, // minutos
         porcentajeAprobacion: 60,
         descripcion: 'Evaluación básica sobre variables, tipos de datos y lógica.',
+        imagen: 'logica.jpg',
         preguntas: [
           {
             texto: '¿Qué palabra clave se usa para declarar una constante en JavaScript?',
@@ -51,9 +52,14 @@ export function inicializarDatos() {
           }
         ]
       }
-    ];
-    localStorage.setItem(CLAVE_EXAMENES, JSON.stringify(examenesIniciales));
-  }
+  ];
+  const examenesGuardados = JSON.parse(localStorage.getItem(CLAVE_EXAMENES) || '[]');
+  const codigosGuardados = new Set(examenesGuardados.map(examen => examen.codigo));
+  const examenesCompletos = [
+    ...examenesGuardados,
+    ...examenesIniciales.filter(examen => !codigosGuardados.has(examen.codigo))
+  ];
+  localStorage.setItem(CLAVE_EXAMENES, JSON.stringify(examenesCompletos));
 }
 
 // =========================================================================

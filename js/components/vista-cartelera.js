@@ -73,6 +73,10 @@ function normalizarTexto(texto) {
 }
 
 function obtenerImagenExamen(examen) {
+  if (examen?.imagen) {
+    return `./img/${encodeURIComponent(examen.imagen)}`;
+  }
+
   const tituloNormalizado = normalizarTexto(examen?.titulo);
   const codigoNormalizado = normalizarTexto(examen?.codigo);
   const descripcionNormalizada = normalizarTexto(examen?.descripcion);
@@ -513,7 +517,7 @@ class VistaCartelera extends HTMLElement {
       ` : `
         <div class="contenedor-tarjetas">
           ${examenes.map(ex => {
-            const imagen = obtenerImagenExamen(ex);
+            const imagen = obtenerImagenExamen(ex) || './img/ingles.png';
             const estiloFondo = imagen ? `style="background-image: url('${imagen}');"` : '';
             const claseSinImagen = imagen ? '' : ' sin-imagen';
 
