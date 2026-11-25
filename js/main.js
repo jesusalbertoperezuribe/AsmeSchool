@@ -56,7 +56,11 @@ export function navegarA(ruta, datosExtra = null) {
   }
 
   // Avisamos a la barra superior (navbar) que cambiamos de pantalla para que actualice sus botones
-  document.dispatchEvent(new CustomEvent('cambio-ruta', { detail: { ruta } }));
+  document.dispatchEvent(new CustomEvent('cambio-ruta', {
+    detail: { ruta },
+    bubbles: true,
+    composed: true
+  }));
 }
 
 // 5. Escuchamos cuando cualquier botón de tus componentes pida cambiar de pantalla
