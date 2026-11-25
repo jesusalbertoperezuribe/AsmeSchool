@@ -1,5 +1,142 @@
 import { obtenerExamenes } from '../storage.js';
 
+const IMAGENES_EXAMENES = [
+  {
+    archivo: 'ciencias politicas.jpg',
+    palabrasClave: ['ciencias politicas', 'ciencia politica', 'politica', 'politicas', 'politico', 'constitucion', 'democracia'],
+    codigos: ['POL', 'CP']
+  },
+  {
+    archivo: 'Algebra.jpg',
+    palabrasClave: ['algebra', 'algebraico', 'algebraica', 'ecuacion', 'ecuaciones', 'polinomio', 'factorizacion'],
+    codigos: ['ALG']
+  },
+  {
+    archivo: 'Fisica.jpg',
+    palabrasClave: ['fisica', 'cinematica', 'dinamica', 'mecanica', 'termodinamica', 'electromagnetismo', 'optica'],
+    codigos: ['FIS', 'PHY']
+  },
+  {
+    archivo: 'Quimica.jpg',
+    palabrasClave: ['quimica', 'estequiometria', 'tabla periodica', 'atomo', 'molecula', 'organica', 'inorganica'],
+    codigos: ['QUI', 'QUIM', 'CHEM']
+  },
+  {
+    archivo: 'Biologia.avif',
+    palabrasClave: ['biologia', 'celula', 'celular', 'genetica', 'anatomia', 'botanica', 'zoologia', 'seres vivos'],
+    codigos: ['BIO']
+  },
+  {
+    archivo: 'historia.avif',
+    palabrasClave: ['historia', 'historico', 'historica', 'edad media', 'edad antigua', 'edad moderna', 'prehistoria', 'revolucion', 'independencia', 'civilizacion'],
+    codigos: ['HIST', 'HIS']
+  },
+  {
+    archivo: 'geografia.jpg',
+    palabrasClave: ['geografia', 'geografico', 'geografica', 'cartografia', 'continente', 'continentes', 'relieve', 'hidrografia'],
+    codigos: ['GEO']
+  },
+  {
+    archivo: 'Literatura.jpg',
+    palabrasClave: ['literatura', 'literario', 'literaria', 'narrativa', 'poesia', 'novela', 'genero lirico', 'lectura critica'],
+    codigos: ['LIT']
+  },
+  {
+    archivo: 'filosofia.jpg',
+    palabrasClave: ['filosofia', 'filosofico', 'filosofica', 'etica', 'metafisica', 'epistemologia', 'ontologia'],
+    codigos: ['FIL', 'PHI']
+  },
+  {
+    archivo: 'logica.jpg',
+    palabrasClave: ['logica', 'silogismo', 'proposicion', 'proposiciones', 'razonamiento', 'tablas de verdad'],
+    codigos: ['LOG']
+  },
+  {
+    archivo: 'ingles.jpg',
+    palabrasClave: ['ingles', 'english', 'grammar', 'vocabulary', 'listening', 'speaking'],
+    codigos: ['ING', 'ENG']
+  },
+  {
+    archivo: 'ecologia.jpg',
+    palabrasClave: ['ecologia', 'ecologico', 'ecologica', 'ecosistema', 'medio ambiente', 'ambiental', 'biodiversidad', 'sostenibilidad'],
+    codigos: ['ECO']
+  }
+];
+
+function normalizarTexto(texto) {
+  return String(texto || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function obtenerImagenExamen(examen) {
+  const tituloNormalizado = normalizarTexto(examen?.titulo);
+  const codigoNormalizado = normalizarTexto(examen?.codigo);
+  const descripcionNormalizada = normalizarTexto(examen?.descripcion);
+
+  const buscarEnTexto = (texto, usarSinEspacios = true, incluirPalabrasClave = true) => {
+    if (!texto) return null;
+    const textoCompacto = texto.replace(/\s+/g, '');
+
+    // Paso 1: coincidencia directa con el nombre del archivo
+    for (const item of IMAGENES_EXAMENES) {
+      const nombreBase = normalizarTexto(item.archivo.replace(/\.[^/.]+$/, ''));
+      const baseCompacto = nombreBase.replace(/\s+/g, '');
+
+      if (texto === nombreBase || (usarSinEspacios && textoCompacto === baseCompacto)) {
+        return item.archivo;
+      }
+      if (texto.includes(nombreBase) || (usarSinEspacios && textoCompacto.includes(baseCompacto))) {
+        return item.archivo;
+      }
+    }
+
+    // Paso 2: coincidencia por palabras clave asociadas al tema
+    if (incluirPalabrasClave) {
+      for (const item of IMAGENES_EXAMENES) {
+        for (const palabra of item.palabrasClave) {
+          const clave = normalizarTexto(palabra);
+          const claveCompacta = clave.replace(/\s+/g, '');
+          if (texto.includes(clave) || (usarSinEspacios && textoCompacto.includes(claveCompacta))) {
+            return item.archivo;
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
+  // 1. Prioridad principal: título del examen
+  const porTitulo = buscarEnTexto(tituloNormalizado);
+  if (porTitulo) return `./img/${encodeURIComponent(porTitulo)}`;
+
+  // 2. Respaldo por prefijo del código (ej: HIST-02, BIO-01, FIS-10)
+  if (codigoNormalizado) {
+    const prefijo = codigoNormalizado.split(' ')[0].replace(/\d+$/, '');
+    const porCodigo = IMAGENES_EXAMENES.find(item =>
+      item.codigos.some(c => c.toLowerCase() === prefijo)
+    );
+    if (porCodigo) return `./img/${encodeURIComponent(porCodigo.archivo)}`;
+  }
+
+  // 3. Respaldo por descripción usando solo el nombre base exacto del tema (excluyendo coincidencias genéricas)
+  if (descripcionNormalizada) {
+    for (const item of IMAGENES_EXAMENES) {
+      const nombreBase = normalizarTexto(item.archivo.replace(/\.[^/.]+$/, ''));
+      if (nombreBase === 'logica') continue;
+      if (descripcionNormalizada.includes(nombreBase)) {
+        return `./img/${encodeURIComponent(item.archivo)}`;
+      }
+    }
+  }
+
+  return null;
+}
+
 class VistaCartelera extends HTMLElement {
   constructor() {
     super();
@@ -60,23 +197,104 @@ class VistaCartelera extends HTMLElement {
           gap: 24px;
         }
 
-        /* Tarjeta estilo q-card */
+        /* Tarjeta estilo q-card con efecto Flip 3D */
         .q-card {
-          background-color: #ffffff;
-          border-radius: 4px;
-          box-shadow: var(--q-shadow-2);
+          perspective: 1000px;
           width: 100%;
           max-width: 340px;
+          min-height: 270px;
           display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          overflow: hidden;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          background-color: transparent;
+          transition: transform 0.2s ease;
         }
 
         .q-card:hover {
           transform: translateY(-3px);
+        }
+
+        .q-card-inner {
+          position: relative;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          transform-style: preserve-3d;
+          transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+          transition-delay: 0s;
+        }
+
+        .q-card:hover .q-card-inner {
+          transform: rotateY(180deg);
+          transition-delay: 5s;
+        }
+
+        .q-card-face {
+          width: 100%;
+          border-radius: 4px;
+          box-shadow: var(--q-shadow-2);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          overflow: hidden;
+          transition: box-shadow 0.2s ease;
+        }
+
+        .q-card:hover .q-card-face {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+        }
+
+        .q-card-front {
+          position: relative;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          background-color: #ffffff;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          transform: rotateY(0deg);
+        }
+
+        .q-card-front::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.80) 0%,
+            rgba(255, 255, 255, 0.86) 100%
+          );
+          z-index: 0;
+          pointer-events: none;
+        }
+
+        .q-card-front.sin-imagen {
+          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #b2dfdb 100%);
+        }
+
+        .q-card-front.sin-imagen::before {
+          background: rgba(255, 255, 255, 0.22);
+        }
+
+        .q-card-front > * {
+          position: relative;
+          z-index: 1;
+        }
+
+        .q-card-back {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #ffffff;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          transform: rotateY(180deg);
+          pointer-events: none;
+        }
+
+        .q-card-back.sin-imagen {
+          background: linear-gradient(135deg, var(--q-primary, #1976D2) 0%, var(--q-secondary, #26A69A) 100%);
         }
 
         .q-card-section {
@@ -92,25 +310,29 @@ class VistaCartelera extends HTMLElement {
           padding: 3px 8px;
           border-radius: 4px;
           margin-bottom: 10px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
         }
 
         .q-card h3 {
           font-size: 1.2rem;
-          font-weight: 500;
+          font-weight: 600;
           color: var(--q-dark, #1D1D1D);
           margin: 0 0 8px 0;
+          text-shadow: 0 0 6px rgba(255, 255, 255, 0.95), 0 1px 2px rgba(255, 255, 255, 0.9);
         }
 
         .descripcion {
-          color: rgba(0, 0, 0, 0.65);
+          color: rgba(17, 24, 39, 0.92);
           font-size: 0.9rem;
+          font-weight: 500;
           line-height: 1.45;
           margin: 0;
+          text-shadow: 0 0 6px rgba(255, 255, 255, 0.95), 0 1px 2px rgba(255, 255, 255, 0.9);
         }
 
         .q-separator {
           border: none;
-          border-top: 1px solid rgba(0, 0, 0, 0.12);
+          border-top: 1px solid rgba(0, 0, 0, 0.14);
           margin: 0;
         }
 
@@ -118,13 +340,15 @@ class VistaCartelera extends HTMLElement {
           display: flex;
           justify-content: space-between;
           padding: 12px 16px;
-          background-color: #fafafa;
+          background-color: rgba(255, 255, 255, 0.38);
           font-size: 0.85rem;
-          color: rgba(0, 0, 0, 0.75);
+          font-weight: 500;
+          color: var(--q-dark, #1D1D1D);
+          text-shadow: 0 0 6px rgba(255, 255, 255, 0.95), 0 1px 2px rgba(255, 255, 255, 0.9);
         }
 
         .detalles strong {
-          color: var(--q-primary, #1976D2);
+          color: var(--q-primary-dark, #1565C0);
         }
 
         .q-card-actions {
@@ -288,27 +512,39 @@ class VistaCartelera extends HTMLElement {
         </div>
       ` : `
         <div class="contenedor-tarjetas">
-          ${examenes.map(ex => `
-            <div class="q-card">
-              <div class="q-card-section">
-                <span class="q-badge">${ex.codigo}</span>
-                <h3>${ex.titulo}</h3>
-                <p class="descripcion">${ex.descripcion}</p>
-              </div>
+          ${examenes.map(ex => {
+            const imagen = obtenerImagenExamen(ex);
+            const estiloFondo = imagen ? `style="background-image: url('${imagen}');"` : '';
+            const claseSinImagen = imagen ? '' : ' sin-imagen';
 
-              <div>
-                <hr class="q-separator">
-                <div class="detalles">
-                  <span>Tiempo: <strong>${ex.tiempo} min</strong></span>
-                  <span>Aprobación: <strong>${ex.porcentajeAprobacion}%</strong></span>
-                </div>
-                <hr class="q-separator">
-                <div class="q-card-actions">
-                  <button class="q-btn btn-primary btn-elegir" data-codigo="${ex.codigo}">Presentar Examen</button>
+            return `
+              <div class="q-card">
+                <div class="q-card-inner">
+                  <div class="q-card-face q-card-front${claseSinImagen}" ${estiloFondo}>
+                    <div class="q-card-section">
+                      <span class="q-badge">${ex.codigo}</span>
+                      <h3>${ex.titulo}</h3>
+                      <p class="descripcion">${ex.descripcion}</p>
+                    </div>
+
+                    <div>
+                      <hr class="q-separator">
+                      <div class="detalles">
+                        <span>Tiempo: <strong>${ex.tiempo} min</strong></span>
+                        <span>Aprobación: <strong>${ex.porcentajeAprobacion}%</strong></span>
+                      </div>
+                      <hr class="q-separator">
+                      <div class="q-card-actions">
+                        <button class="q-btn btn-primary btn-elegir" data-codigo="${ex.codigo}">Presentar Examen</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="q-card-face q-card-back${claseSinImagen}" ${estiloFondo} aria-hidden="true"></div>
                 </div>
               </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
       `}
 
