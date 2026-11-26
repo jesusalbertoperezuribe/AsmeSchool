@@ -1,4 +1,4 @@
-import { obtenerUsuarios, guardarUsuario, eliminarUsuario, obtenerSesionActual } from '../storage.js';
+import { obtenerUsuarios, guardarUsuario, eliminarUsuario } from '../storage.js';
 
 class VistaUsuarios extends HTMLElement {
   constructor() {
@@ -8,15 +8,6 @@ class VistaUsuarios extends HTMLElement {
   }
 
   connectedCallback() {
-    // Candado de seguridad a nivel de componente
-    if (!obtenerSesionActual()) {
-      this.dispatchEvent(new CustomEvent('navegar', {
-        detail: { ruta: 'login' },
-        bubbles: true,
-        composed: true
-      }));
-      return;
-    }
     this.render();
   }
 

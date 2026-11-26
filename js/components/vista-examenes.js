@@ -1,4 +1,4 @@
-import { obtenerExamenes, guardarExamen, eliminarExamen, obtenerSesionActual } from '../storage.js';
+import { obtenerExamenes, guardarExamen, eliminarExamen } from '../storage.js';
 
 class VistaExamenes extends HTMLElement {
   constructor() {
@@ -9,15 +9,6 @@ class VistaExamenes extends HTMLElement {
   }
 
   connectedCallback() {
-    // Candado de seguridad a nivel de componente
-    if (!obtenerSesionActual()) {
-      this.dispatchEvent(new CustomEvent('navegar', {
-        detail: { ruta: 'login' },
-        bubbles: true,
-        composed: true
-      }));
-      return;
-    }
     this.render();
   }
 
