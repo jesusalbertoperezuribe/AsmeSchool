@@ -44,12 +44,13 @@ export function navegarA(ruta, datosExtra = null) {
       app.innerHTML = '<vista-examenes></vista-examenes>';
       break;
 
-    case 'resolver':
+    case 'resolver': {
       const vistaExamen = document.createElement('vista-resolver');
       // Le pasamos los datos del examen elegido y del estudiante
-      vistaExamen.datosInicio = datosExtra; 
+      vistaExamen.datosInicio = datosExtra;
       app.appendChild(vistaExamen);
       break;
+    }
 
     default:
       app.innerHTML = '<vista-cartelera></vista-cartelera>';
